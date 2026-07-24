@@ -1776,7 +1776,7 @@
       "b": 187,
       "a": 255
     },
-    "_string": "Enter text here...",
+    "_string": "",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
@@ -2359,7 +2359,7 @@
       "b": 187,
       "a": 255
     },
-    "_string": "Enter text here...",
+    "_string": "",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 20,

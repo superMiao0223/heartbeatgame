@@ -16,6 +16,7 @@ export const GameData = {
 };
 
 import { calculateScore, getNameWuxing } from './wuxing';
+import { AdManager } from './ad_manager';
 
 @ccclass('start_game')
 export class start_game extends Component {
@@ -25,6 +26,8 @@ export class start_game extends Component {
             matchingNode.active = false;
         }
     }
+
+    private progressComplete = false;
 
     update(dt: number) {
         const matchingNode = find('Canvas/matching');
@@ -42,9 +45,11 @@ export class start_game extends Component {
 
         const currentWidth = uiTransform.width;
         const maxWidth = 300;
+        const duration = 1;
+        const speed = maxWidth / duration;
 
         if (currentWidth < maxWidth) {
-            const newWidth = Math.min(currentWidth + 2, maxWidth);
+            const newWidth = Math.min(currentWidth + speed * dt, maxWidth);
             uiTransform.setContentSize(newWidth, 15);
 
             const percentage = Math.floor((newWidth / maxWidth) * 100);
@@ -55,12 +60,14 @@ export class start_game extends Component {
             if (percentageLbl) {
                 percentageLbl.string = percentage + '%';
             }
-        } else {
+        } else if (!this.progressComplete) {
+            this.progressComplete = true;
+            console.log('进度条完成，进入结果场景...');
             director.loadScene('result');
         }
     }
 
-    onClickStartGame() {
+    async onClickStartGame() {
         const yourNameNode = find('Canvas/yourname_input');
         const hisNameNode = find('Canvas/hisname_input');
 
@@ -132,6 +139,27 @@ export class start_game extends Component {
 
         console.log('计算结果:', GameData);
 
+        this.playAdAndShowResult();
+    }
+
+    private async playAdAndShowResult() {
+        console.log('开始播放激励视频广告...');
+
+        const adResult = await AdManager.getInstance().showRewardedVideo();
+
+        if (!adResult.success) {
+            alert('暂无广告，请稍后再试');
+            console.log('广告播放失败:', adResult.error);
+            return;
+        }
+
+        if (!adResult.isEnded) {
+            alert('请完整观看广告后再进行测试');
+            console.log('用户未完整观看广告');
+            return;
+        }
+
+        console.log('广告播放完成，开始展示进度条...');
         this.hideAllUIAndShowMatching();
     }
 
@@ -151,6 +179,8 @@ export class start_game extends Component {
     }
 
     hideAllUIAndShowMatching() {
+        this.progressComplete = false;
+
         const canvas = find('Canvas');
         if (!canvas) return;
 
