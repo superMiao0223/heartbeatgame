@@ -157,39 +157,77 @@ export function calculateScore(yourName: string, hisName: string): { score: numb
     const yourWuxing = getNameWuxing(yourName);
     const hisWuxing = getNameWuxing(hisName);
 
+    console.log(`名字五行: ${yourName}=${yourWuxing}, ${hisName}=${hisWuxing}`);
+
     let shengCount = 0;
     let keCount = 0;
     const details: string[] = [];
 
-    for (const ta of hisWuxing) {
-        for (const me of yourWuxing) {
+    for (let j = 0; j < hisWuxing.length; j++) {
+        const ta = hisWuxing[j];
+        let hasSheng = false;
+        let hasKe = false;
+        for (let i = 0; i < yourWuxing.length; i++) {
+            const me = yourWuxing[i];
             if (ShengKe[ta].sheng === me) {
-                shengCount++;
+                hasSheng = true;
                 details.push(`${ta}生${me}`);
             } else if (ShengKe[ta].ke === me) {
-                keCount++;
+                hasKe = true;
                 details.push(`${ta}克${me}`);
             }
         }
+        if (hasSheng) shengCount++;
+        if (hasKe) keCount++;
     }
 
-    let shengScore = 0;
-    const totalChars = yourWuxing.length * hisWuxing.length;
-    if (totalChars === 0) {
-        return { score: 0, details: [], suggestion: '无法计算五行属性，请输入名字' };
+    console.log(`逐个判断结果(我的字 vs 他的字):`);
+    for (let i = 0; i < yourWuxing.length; i++) {
+        const me = yourWuxing[i];
+        for (let j = 0; j < hisWuxing.length; j++) {
+            const ta = hisWuxing[j];
+            let relation = '无';
+            if (ShengKe[ta].sheng === me) relation = '生';
+            else if (ShengKe[ta].ke === me) relation = '克';
+            console.log(`  ${me} vs ${ta}: ${relation}`);
+        }
     }
 
-    const shengRatio = shengCount / totalChars;
-    const keRatio = keCount / totalChars;
+    const totalChars = hisWuxing.length;
+    console.log(`生克统计: 他生我=${shengCount}, 他克我=${keCount}, 总字数=${totalChars}`);
 
-    shengScore = Math.floor(shengRatio * 100);
-    const keScore = Math.floor(keRatio * -50);
+    let baseScore = 0;
+    let shengBonus = 0;
+    let kePenalty = 0;
 
-    let finalScore = shengScore + keScore;
+    if (shengCount === totalChars) {
+        shengBonus = 100;
+    } else if (shengCount >= 2) {
+        shengBonus = 60;
+    } else if (shengCount === 1) {
+        shengBonus = 30;
+    }
+
+    if (keCount === totalChars) {
+        kePenalty = 60;
+    } else if (keCount >= 2) {
+        kePenalty = 30;
+    } else if (keCount === 1) {
+        kePenalty = 10;
+    }
+
+    let finalScore = baseScore + shengBonus - kePenalty;
+
     if (finalScore < 0) finalScore = 0;
     if (finalScore > 100) finalScore = 100;
 
-    const suggestion = getSuggestion(yourWuxing, hisWuxing);
+    console.log(`得分计算: 基础分=${baseScore}, 生${shengCount}字加成=${shengBonus}, 克${keCount}字扣减=${kePenalty}, 最终=${finalScore}`);
+
+    let suggestion = getSuggestion(yourWuxing, hisWuxing);
+    suggestion = '【建议】' + suggestion;
+    if (suggestion.length >= 35) {
+        suggestion = suggestion.substring(0, 35) + '\n' + suggestion.substring(35);
+    }
 
     return {
         score: finalScore,

@@ -7,7 +7,12 @@ export const GameData = {
     yourWuxing: '',
     hisWuxing: '',
     score: 0,
-    suggestion: ''
+    suggestion: '',
+    loggedIn: false,
+    openid: '',
+    unionid: '',
+    nickname: '',
+    avatar: ''
 };
 
 import { calculateScore, getNameWuxing } from './wuxing';
@@ -75,16 +80,21 @@ export class start_game extends Component {
 
         if (!yourName) errors.push('你的名字');
         else if (!this.isChinese(yourName)) errors.push('你的名字');
+        else if (yourName.length > 6) errors.push('你的名字');
 
         if (!hisName) errors.push('他的名字');
         else if (!this.isChinese(hisName)) errors.push('他的名字');
+        else if (hisName.length > 6) errors.push('他的名字');
 
         if (errors.length > 0) {
             let msg = '';
             const hasEmpty = !yourName || !hisName;
             const hasInvalid = (yourName && !this.isChinese(yourName)) || (hisName && !this.isChinese(hisName));
+            const hasTooLong = (yourName && yourName.length > 6) || (hisName && hisName.length > 6);
 
-            if (hasEmpty && hasInvalid) {
+            if (hasTooLong) {
+                msg = errors.join('、') + '超过6字限制';
+            } else if (hasEmpty && hasInvalid) {
                 msg = errors.join('、') + '未输入名字或包含非中文字符';
             } else if (hasEmpty) {
                 msg = errors.join('、') + '未输入名字';
@@ -96,9 +106,13 @@ export class start_game extends Component {
 
             if (!yourName || !this.isChinese(yourName)) {
                 this.showInputError(yourNameNode, !yourName ? '未输入名字' : '请输入中文名字');
+            } else if (yourName.length > 6) {
+                this.showInputError(yourNameNode, '名字不能超过6字');
             }
             if (!hisName || !this.isChinese(hisName)) {
                 this.showInputError(hisNameNode, !hisName ? '未输入名字' : '请输入中文名字');
+            } else if (hisName.length > 6) {
+                this.showInputError(hisNameNode, '名字不能超过6字');
             }
 
             return;

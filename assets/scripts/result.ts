@@ -10,10 +10,19 @@ export class result extends Component {
 
         const yournameNode = find('Canvas/yourname');
         const hisnameNode = find('Canvas/hisname');
-        const hepaiNumNode = find('Canvas/hepai_num');
-        const yournameStrNode = find('Canvas/yourname_sttr');
-        const hisnameStrNode = find('Canvas/hisname_sttr');
+        const hepaiNumNode = find('Canvas/hepai/hepai_num');
+        const yournameAttrNode = find('Canvas/yourname/yourname_attr');
+        const hisnameAttrNode = find('Canvas/hisname/hisname_sttr');
         const hitResNode = find('Canvas/hit_res');
+
+        console.log('节点查找结果:', {
+            yournameNode: yournameNode ? '找到' : '未找到',
+            hisnameNode: hisnameNode ? '找到' : '未找到',
+            hepaiNumNode: hepaiNumNode ? '找到' : '未找到',
+            yournameAttrNode: yournameAttrNode ? '找到' : '未找到',
+            hisnameAttrNode: hisnameAttrNode ? '找到' : '未找到',
+            hitResNode: hitResNode ? '找到' : '未找到'
+        });
 
         if (yournameNode) {
             const lbl = yournameNode.getComponent(Label);
@@ -41,21 +50,22 @@ export class result extends Component {
             }
         }
 
-        if (yournameStrNode) {
-            const lbl = yournameStrNode.getComponent(Label);
+        if (yournameAttrNode) {
+            const lbl = yournameAttrNode.getComponent(Label);
             if (lbl) {
                 lbl.string = GameData.yourWuxing;
             }
         }
 
-        if (hisnameStrNode) {
-            const lbl = hisnameStrNode.getComponent(Label);
+        if (hisnameAttrNode) {
+            const lbl = hisnameAttrNode.getComponent(Label);
             if (lbl) {
                 lbl.string = GameData.hisWuxing;
             }
         }
 
         if (hitResNode) {
+            hitResNode.active = true;
             const lbl = hitResNode.getComponent(Label);
             if (lbl) {
                 lbl.string = GameData.suggestion;
