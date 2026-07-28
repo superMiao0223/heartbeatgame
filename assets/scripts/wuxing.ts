@@ -161,24 +161,23 @@ export function calculateScore(yourName: string, hisName: string): { score: numb
 
     let shengCount = 0;
     let keCount = 0;
+    let neutralCount = 0;
     const details: string[] = [];
 
-    for (let j = 0; j < hisWuxing.length; j++) {
-        const ta = hisWuxing[j];
-        let hasSheng = false;
-        let hasKe = false;
-        for (let i = 0; i < yourWuxing.length; i++) {
-            const me = yourWuxing[i];
+    for (let i = 0; i < yourWuxing.length; i++) {
+        const me = yourWuxing[i];
+        for (let j = 0; j < hisWuxing.length; j++) {
+            const ta = hisWuxing[j];
             if (ShengKe[ta].sheng === me) {
-                hasSheng = true;
+                shengCount++;
                 details.push(`${ta}生${me}`);
             } else if (ShengKe[ta].ke === me) {
-                hasKe = true;
+                keCount++;
                 details.push(`${ta}克${me}`);
+            } else {
+                neutralCount++;
             }
         }
-        if (hasSheng) shengCount++;
-        if (hasKe) keCount++;
     }
 
     console.log(`逐个判断结果(我的字 vs 他的字):`);
@@ -193,35 +192,36 @@ export function calculateScore(yourName: string, hisName: string): { score: numb
         }
     }
 
-    const totalChars = hisWuxing.length;
-    console.log(`生克统计: 他生我=${shengCount}, 他克我=${keCount}, 总字数=${totalChars}`);
+    const totalCombinations = yourWuxing.length * hisWuxing.length;
+    console.log(`生克统计: 他生我=${shengCount}, 他克我=${keCount}, 不生不克=${neutralCount}, 总组合=${totalCombinations}`);
 
     let baseScore = 0;
     let shengBonus = 0;
     let kePenalty = 0;
+    let neutralBonus = neutralCount * 10;
 
-    if (shengCount === totalChars) {
+    if (shengCount === totalCombinations) {
         shengBonus = 100;
     } else if (shengCount >= 2) {
-        shengBonus = 60;
+        shengBonus = 80;
     } else if (shengCount === 1) {
         shengBonus = 30;
     }
 
-    if (keCount === totalChars) {
-        kePenalty = 60;
+    if (keCount === totalCombinations) {
+        kePenalty = 100;
     } else if (keCount >= 2) {
-        kePenalty = 30;
+        kePenalty = 50;
     } else if (keCount === 1) {
-        kePenalty = 10;
+        kePenalty = 20;
     }
 
-    let finalScore = baseScore + shengBonus - kePenalty;
+    let finalScore = baseScore + shengBonus - kePenalty + neutralBonus;
 
     if (finalScore < 0) finalScore = 0;
     if (finalScore > 100) finalScore = 100;
 
-    console.log(`得分计算: 基础分=${baseScore}, 生${shengCount}字加成=${shengBonus}, 克${keCount}字扣减=${kePenalty}, 最终=${finalScore}`);
+    console.log(`得分计算: 基础分=${baseScore}, 生${shengCount}次加成=${shengBonus}, 克${keCount}次扣减=${kePenalty}, 不生不克${neutralCount}次加成=${neutralBonus}, 最终=${finalScore}`);
 
     let suggestion = getSuggestion(yourWuxing, hisWuxing);
     suggestion = '【建议】' + suggestion;
