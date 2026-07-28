@@ -1,11 +1,38 @@
-import { _decorator, Component, Label, EditBox, find, director, Sprite, SpriteFrame, resources, Node, Vec3 } from 'cc';
+import { _decorator, Component, Label, EditBox, find, director, Sprite, SpriteFrame, resources, Node, Vec3, UITransform } from 'cc';
 const { ccclass, property } = _decorator;
 
 import { GameData } from './start_game';
 
 @ccclass('result')
 export class result extends Component {
+    @property({ tooltip: '建议文字X轴位置' })
+    suggestionTextX: number = -200;
+
+    @property({ tooltip: '建议文字Y轴位置' })
+    suggestionTextY: number = -150;
+
+    @property({ tooltip: '建议文字最大宽度（超过自动换行）' })
+    suggestionMaxWidth: number = 400;
+
+    @property({ tooltip: '建议图片X轴位置' })
+    suggestionImageX: number = 0;
+
+    @property({ tooltip: '建议图片Y轴位置' })
+    suggestionImageY: number = 20;
+
+    @property({ tooltip: '建议图片缩放倍数' })
+    suggestionImageScale: number = 2;
+
     start() {
+        console.log('========== result start() 执行了 ==========');
+        console.log('属性值:', {
+            suggestionTextX: this.suggestionTextX,
+            suggestionTextY: this.suggestionTextY,
+            suggestionMaxWidth: this.suggestionMaxWidth,
+            suggestionImageX: this.suggestionImageX,
+            suggestionImageY: this.suggestionImageY,
+            suggestionImageScale: this.suggestionImageScale
+        });
         console.log('result场景初始化:', GameData);
 
         const yournameNode = find('Canvas/yourname');
@@ -66,16 +93,40 @@ export class result extends Component {
 
         if (hitResNode) {
             hitResNode.active = true;
-            const lbl = hitResNode.getComponent(Label);
-            if (lbl) {
-                lbl.string = GameData.suggestion;
-            }
+            this.setupSuggestionLabel(hitResNode);
         }
 
-        this.initSuggestionImage();
+        this.initSuggestionImage(hitResNode);
     }
 
-    initSuggestionImage() {
+    setupSuggestionLabel(hitResNode: Node) {
+        const lbl = hitResNode.getComponent(Label);
+        if (lbl) {
+            lbl.string = GameData.suggestion;
+            lbl.overflow = Label.Overflow.RESIZE_HEIGHT;
+            lbl.enableWrapText = true;
+
+            const uiTransform = hitResNode.getComponent(UITransform);
+            if (uiTransform) {
+                uiTransform.setContentSize(this.suggestionMaxWidth, uiTransform.contentSize.height);
+            } else {
+                const newUITransform = hitResNode.addComponent(UITransform);
+                newUITransform.setContentSize(this.suggestionMaxWidth, 50);
+            }
+
+            console.log('设置建议文字位置:', {
+                x: this.suggestionTextX,
+                y: this.suggestionTextY,
+                maxWidth: this.suggestionMaxWidth,
+                文字内容: GameData.suggestion
+            });
+
+            hitResNode.setPosition(this.suggestionTextX, this.suggestionTextY, 0);
+            console.log('设置后节点位置:', hitResNode.position);
+        }
+    }
+
+    initSuggestionImage(hitResNode: Node | null) {
         const canvas = find('Canvas');
         if (!canvas) return;
 
@@ -84,9 +135,32 @@ export class result extends Component {
             imgNode = new Node('suggestion_img');
             canvas.addChild(imgNode);
             imgNode.addComponent(Sprite);
+            imgNode.addComponent(UITransform);
+            console.log('创建了新的 suggestion_img 节点');
+        } else {
+            console.log('找到已存在的 suggestion_img 节点');
         }
 
-        imgNode.setPosition(38, 300, 0);
+        console.log('设置图片属性:', {
+            x: this.suggestionImageX,
+            y: this.suggestionImageY,
+            scale: this.suggestionImageScale
+        });
+
+        imgNode.setPosition(this.suggestionImageX, this.suggestionImageY, 0);
+        imgNode.setScale(this.suggestionImageScale, this.suggestionImageScale, 1);
+        console.log('设置后图片位置:', imgNode.position);
+        console.log('设置后图片缩放:', imgNode.scale);
+
+        // 关键：图片创建完成后，把文字节点放到最上层
+        if (hitResNode) {
+            const parent = hitResNode.parent;
+            if (parent) {
+                const index = parent.children.length - 1;
+                hitResNode.setSiblingIndex(index);
+            }
+            console.log('文字节点已设为最上层 (siblingIndex:', hitResNode.getSiblingIndex ? hitResNode.getSiblingIndex() : 'N/A', ')');
+        }
 
         if (GameData.suggestionImage) {
             const imagePath = GameData.suggestionImage.replace('.png', '');

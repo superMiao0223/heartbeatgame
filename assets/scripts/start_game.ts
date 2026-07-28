@@ -22,7 +22,7 @@ import { AdManager } from './ad_manager';
 @ccclass('start_game')
 export class start_game extends Component {
     @property({ tooltip: '是否显示八字合婚按钮' })
-    showZipinButton: boolean = true;
+    showZipinButton: boolean = false;
 
     onLoad() {
         const matchingNode = find('Canvas/matching');
@@ -30,9 +30,13 @@ export class start_game extends Component {
             matchingNode.active = false;
         }
 
+        console.log('showZipinButton 属性值:', this.showZipinButton);
         const zipinBtn = find('Canvas/tozipin');
+        console.log('tozipin 节点是否找到:', !!zipinBtn);
         if (zipinBtn) {
+            console.log('设置前 active:', zipinBtn.active);
             zipinBtn.active = this.showZipinButton;
+            console.log('设置后 active:', zipinBtn.active);
         }
     }
 
