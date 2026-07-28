@@ -8,7 +8,7 @@ export class AdManager {
     private static instance: AdManager;
     private videoAd: any = null;
     private adUnitId = 'your_ad_unit_id';
-    private useMock = false;
+    private useMock = true;
 
     public static getInstance(): AdManager {
         if (!AdManager.instance) {
