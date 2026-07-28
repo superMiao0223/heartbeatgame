@@ -20,10 +20,18 @@ import { AdManager } from './ad_manager';
 
 @ccclass('start_game')
 export class start_game extends Component {
+    @property({ tooltip: '是否显示八字合婚按钮' })
+    showZipinButton: boolean = true;
+
     onLoad() {
         const matchingNode = find('Canvas/matching');
         if (matchingNode) {
             matchingNode.active = false;
+        }
+
+        const zipinBtn = find('Canvas/tozipin');
+        if (zipinBtn) {
+            zipinBtn.active = this.showZipinButton;
         }
     }
 
@@ -208,5 +216,25 @@ export class start_game extends Component {
 
     isChinese(str: string): boolean {
         return /^[\u4e00-\u9fa5]+$/.test(str);
+    }
+
+    onClickZipin() {
+        director.loadScene('zipin');
+    }
+
+    toggleZipinButton() {
+        const zipinBtn = find('Canvas/tozipin');
+        if (zipinBtn) {
+            zipinBtn.active = !zipinBtn.active;
+            this.showZipinButton = zipinBtn.active;
+        }
+    }
+
+    setZipinButtonVisible(visible: boolean) {
+        const zipinBtn = find('Canvas/tozipin');
+        if (zipinBtn) {
+            zipinBtn.active = visible;
+            this.showZipinButton = visible;
+        }
     }
 }
