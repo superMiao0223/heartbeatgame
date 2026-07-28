@@ -8,6 +8,7 @@ export const GameData = {
     hisWuxing: '',
     score: 0,
     suggestion: '',
+    suggestionImage: '',
     loggedIn: false,
     openid: '',
     unionid: '',
@@ -144,6 +145,7 @@ export class start_game extends Component {
         GameData.hisWuxing = hisWuxingArray.join('。');
         GameData.score = result.score;
         GameData.suggestion = result.suggestion;
+        GameData.suggestionImage = result.suggestionImage;
 
         console.log('计算结果:', GameData);
 

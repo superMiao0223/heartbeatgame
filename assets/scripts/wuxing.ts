@@ -153,7 +153,7 @@ export function getNameWuxing(name: string): WuxingType[] {
     return result;
 }
 
-export function calculateScore(yourName: string, hisName: string): { score: number; details: string[]; suggestion: string } {
+export function calculateScore(yourName: string, hisName: string): { score: number; details: string[]; suggestion: string; suggestionImage: string } {
     const yourWuxing = getNameWuxing(yourName);
     const hisWuxing = getNameWuxing(hisName);
 
@@ -223,62 +223,57 @@ export function calculateScore(yourName: string, hisName: string): { score: numb
 
     console.log(`得分计算: 基础分=${baseScore}, 生${shengCount}次加成=${shengBonus}, 克${keCount}次扣减=${kePenalty}, 不生不克${neutralCount}次加成=${neutralBonus}, 最终=${finalScore}`);
 
-    let suggestion = getSuggestion(yourWuxing, hisWuxing);
-    suggestion = '【建议】' + suggestion;
-    if (suggestion.length >= 35) {
-        suggestion = suggestion.substring(0, 35) + '\n' + suggestion.substring(35);
-    }
+    const suggestionResult = getSuggestion(finalScore);
 
     return {
         score: finalScore,
         details: details,
-        suggestion: suggestion
+        suggestion: suggestionResult.text,
+        suggestionImage: suggestionResult.image
     };
 }
 
-function getSuggestion(yourWuxing: WuxingType[], hisWuxing: WuxingType[]): string {
-    const yourCount: Record<WuxingType, number> = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
-    const hisCount: Record<WuxingType, number> = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
+function getSuggestion(score: number): { text: string; image: string } {
+    const lowTexts = [
+        '彼此的风格差异较大，相处容易产生观点碰撞，多多包容会收获不一样的新鲜感',
+        '双方偏好与思路区别明显，日常互动容易出现想法分歧，耐心沟通更重要',
+        '两个人的喜好、思维节奏存在不小差距，不妨试着接纳对方不一样的角度'
+    ];
+    const lowImages = ['imgs/30.png', 'imgs/50.png'];
 
-    for (const w of yourWuxing) yourCount[w]++;
-    for (const w of hisWuxing) hisCount[w]++;
+    const midTexts = [
+        '你们的相处碰撞感不同关键词相遇，衍生不一样的互动画面',
+        '两个人在一起会形成独特的互动风格',
+        '彼此风格不同，适合互相包容、新鲜互动'
+    ];
+    const midImages = ['imgs/65.png', 'imgs/80.png'];
 
-    let yourMaxWuxing: WuxingType = '金';
-    let yourMaxCount = 0;
-    let hisMaxWuxing: WuxingType = '金';
-    let hisMaxCount = 0;
+    const highTexts = [
+        '相处中互相扶持的一面，大于想法分歧带来的摩擦，多沟通便能收获更好的相处体验',
+        '互相成全的暖意，多于观点碰撞带来的小矛盾',
+        '双向给予的暖意，远胜过想法差异产生的隔阂'
+    ];
+    const highImages = ['imgs/90.png', 'imgs/100.png'];
 
-    for (const key of ['金', '木', '水', '火', '土'] as WuxingType[]) {
-        if (yourCount[key] > yourMaxCount) {
-            yourMaxCount = yourCount[key];
-            yourMaxWuxing = key;
-        }
-        if (hisCount[key] > hisMaxCount) {
-            hisMaxCount = hisCount[key];
-            hisMaxWuxing = key;
-        }
-    }
+    let texts: string[];
+    let images: string[];
 
-    const shengSuggestions: Record<WuxingType, string> = {
-        '金': '金元素旺相，适合与水属性或土属性的人交往，水能生金，土能生金。',
-        '木': '木元素旺相，适合与火属性或水属性的人交往，水能生木，木能生火。',
-        '水': '水元素旺相，适合与木属性或金属性的人交往，金能生水，水能生木。',
-        '火': '火元素旺相，适合与土属性或木属性的人交往，木能生火，火能生土。',
-        '土': '土元素旺相，适合与金属性或火属性的人交往，火能生土，土能生金。'
-    };
-
-    let matchDetail = '';
-    if (ShengKe[hisMaxWuxing].sheng === yourMaxWuxing) {
-        matchDetail = `你们的主属性${hisMaxWuxing}生${yourMaxWuxing}，非常合拍！`;
-    } else if (ShengKe[hisMaxWuxing].ke === yourMaxWuxing) {
-        matchDetail = `你们的主属性${hisMaxWuxing}克${yourMaxWuxing}，需要多加磨合。`;
-    } else if (ShengKe[yourMaxWuxing].sheng === hisMaxWuxing) {
-        matchDetail = `你们的主属性${yourMaxWuxing}生${hisMaxWuxing}，你会很包容对方。`;
-    } else if (ShengKe[yourMaxWuxing].ke === hisMaxWuxing) {
-        matchDetail = `你们的主属性${yourMaxWuxing}克${hisMaxWuxing}，对方会比较听你的。`;
+    if (score < 50) {
+        texts = lowTexts;
+        images = lowImages;
+    } else if (score < 80) {
+        texts = midTexts;
+        images = midImages;
     } else {
-        matchDetail = `你们的主属性${yourMaxWuxing}和${hisMaxWuxing}相生相克，需要互相理解。`;
+        texts = highTexts;
+        images = highImages;
     }
 
-    return `${matchDetail}${shengSuggestions[yourMaxWuxing]}`;
+    const randomTextIndex = Math.floor(Math.random() * texts.length);
+    const randomImageIndex = Math.floor(Math.random() * images.length);
+
+    return {
+        text: texts[randomTextIndex],
+        image: images[randomImageIndex]
+    };
 }

@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, EditBox, find, director } from 'cc';
+import { _decorator, Component, Label, EditBox, find, director, Sprite, SpriteFrame, resources, Node, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
 import { GameData } from './start_game';
@@ -70,6 +70,36 @@ export class result extends Component {
             if (lbl) {
                 lbl.string = GameData.suggestion;
             }
+        }
+
+        this.initSuggestionImage();
+    }
+
+    initSuggestionImage() {
+        const canvas = find('Canvas');
+        if (!canvas) return;
+
+        let imgNode = find('Canvas/suggestion_img');
+        if (!imgNode) {
+            imgNode = new Node('suggestion_img');
+            canvas.addChild(imgNode);
+            imgNode.addComponent(Sprite);
+        }
+
+        imgNode.setPosition(38, 300, 0);
+
+        if (GameData.suggestionImage) {
+            const imagePath = GameData.suggestionImage.replace('.png', '');
+            resources.load(imagePath + '/spriteFrame', SpriteFrame, (err, spriteFrame) => {
+                if (err) {
+                    console.error('加载建议图片失败:', err);
+                    return;
+                }
+                const sprite = imgNode!.getComponent(Sprite);
+                if (sprite && spriteFrame) {
+                    sprite.spriteFrame = spriteFrame;
+                }
+            });
         }
     }
 
