@@ -21,8 +21,8 @@ import { AdManager } from './ad_manager';
 
 @ccclass('start_game')
 export class start_game extends Component {
-    @property({ tooltip: '是否显示八字合婚按钮' })
-    showZipinButton: boolean = false;
+    @property({ tooltip: '输入框文字左边距（空几个字符）' })
+    inputPaddingLeft: number = 20;
 
     onLoad() {
         const matchingNode = find('Canvas/matching');
@@ -37,6 +37,27 @@ export class start_game extends Component {
             console.log('设置前 active:', zipinBtn.active);
             zipinBtn.active = this.showZipinButton;
             console.log('设置后 active:', zipinBtn.active);
+        }
+
+        this.setupInputPadding();
+    }
+
+    setupInputPadding() {
+        const inputNames = ['yourname_input', 'hisname_input'];
+        for (const name of inputNames) {
+            const node = find('Canvas/' + name);
+            if (!node) {
+                console.log('未找到节点:', name);
+                continue;
+            }
+            const editBox = node.getComponent(EditBox);
+            if (!editBox) {
+                console.log(name + ' 没有 EditBox 组件');
+                continue;
+            }
+            (editBox as any).paddingLeft = this.inputPaddingLeft;
+            (editBox as any).paddingRight = this.inputPaddingLeft;
+            console.log('设置 ' + name + ' 左边距:', this.inputPaddingLeft);
         }
     }
 
@@ -98,14 +119,14 @@ export class start_game extends Component {
 
         const errors: string[] = [];
 
-        if (!yourName) errors.push('你的名字');
-        else if (!this.isChinese(yourName)) errors.push('你的名字');
-        else if (yourName.length > 6) errors.push('你的名字');
+        if (!yourName) errors.push('你的关键词');
+        else if (!this.isChinese(yourName)) errors.push('你的关键词');
+        else if (yourName.length > 6) errors.push('你的关键词');
 
-        if (!hisName) errors.push('他的名字');
-        else if (!this.isChinese(hisName)) errors.push('他的名字');
-        else if (hisName.length > 6) errors.push('他的名字');
-
+        if (!hisName) errors.push('他的关键词');
+        else if (!this.isChinese(hisName)) errors.push('他的关键词');
+        else if (hisName.length > 6) errors.push('他的关键词');
+        
         if (errors.length > 0) {
             let msg = '';
             const hasEmpty = !yourName || !hisName;
@@ -115,24 +136,24 @@ export class start_game extends Component {
             if (hasTooLong) {
                 msg = errors.join('、') + '超过6字限制';
             } else if (hasEmpty && hasInvalid) {
-                msg = errors.join('、') + '未输入名字或包含非中文字符';
+                msg = errors.join('、') + '未输入关键词或包含非中文字符';
             } else if (hasEmpty) {
-                msg = errors.join('、') + '未输入名字';
+                msg = errors.join('、') + '未输入关键词';
             } else {
-                msg = errors.join('、') + '请输入中文名字';
+                msg = errors.join('、') + '请输入中文关键词';
             }
 
             alert(msg);
 
             if (!yourName || !this.isChinese(yourName)) {
-                this.showInputError(yourNameNode, !yourName ? '未输入名字' : '请输入中文名字');
+                this.showInputError(yourNameNode, !yourName ? '未输入你的关键词' : '请输入中文关键词');
             } else if (yourName.length > 6) {
-                this.showInputError(yourNameNode, '名字不能超过6字');
+                this.showInputError(yourNameNode, '你的关键词不能超过6字');
             }
             if (!hisName || !this.isChinese(hisName)) {
-                this.showInputError(hisNameNode, !hisName ? '未输入名字' : '请输入中文名字');
+                this.showInputError(hisNameNode, !hisName ? '未输入他的关键词' : '请输入中文关键词');
             } else if (hisName.length > 6) {
-                this.showInputError(hisNameNode, '名字不能超过6字');
+                this.showInputError(hisNameNode, '他的关键词不能超过6字');
             }
 
             return;
